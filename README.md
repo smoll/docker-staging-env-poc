@@ -36,57 +36,62 @@
 
     host-1$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
 
-    172.28.128.9
+    192.168.50.101
     ```
+
+    Note that `192.168.50.101` is actually hardcoded in the Vagrantfile to make these steps deterministic! Feel free to adjust the Vagrantfile as needed.
 
 0. On `host-1`, start Consul and Registrator
 
     ```bash
-    # start consul; note that we are running the cmd in a subshell!
-    host-1$ $(docker run --rm progrium/consul cmd:run 172.28.128.9 -d -v /mnt:/data)
+    # start consul
+    host-1$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.101 -d -v /mnt:/data)
+
+    host-1$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
 
     # start registrator
-    host-1$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://localhost:8500
-
-    # check everything is up
-    host-1$ docker ps
-
-    CONTAINER ID        IMAGE                           COMMAND                CREATED             STATUS              PORTS                                                                                                            NAMES
-    a33d20734dce        gliderlabs/registrator:latest   "/bin/registrator co   26 minutes ago      Up 26 minutes                                                                                                                        registrator
-    fd3e7cd43f38        progrium/consul:latest          "/bin/start -server    27 minutes ago      Up 27 minutes       8302/tcp, 8400/tcp, 8300/tcp, 8301/udp, 53/tcp, 8301/tcp, 8302/udp, 0.0.0.0:53->53/udp, 0.0.0.0:8500->8500/tcp   berserk_hawking
+    host-1$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
     ```
 
-0. On `host-2`, run the same commands as on `host-1` **EXCEPT** specify a join IP (or else it will start a new Consul cluster instead of joining the existing one!)
+0. On `host-2`, run the same commands as on `host-1` except for Consul, you must specify a join IP (or else it will start a new Consul cluster instead of joining the existing one!)
 
-    See the [README for progrium/consul](https://github.com/gliderlabs/docker-consul/tree/legacy#runner-command) for more info.
+    See the [README for gliderlabs/consul](https://github.com/gliderlabs/docker-consul/tree/legacy#runner-command) for more info. **NOTE:** README says to use `JOIN_IP::CURRENT_IP` syntax, but the correct syntax appears to be `CURRENT_IP:JOIN_IP`, weird...
 
     ```bash
     host-2$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
 
-    172.28.128.10
+    192.168.50.102
 
-    host-2$ $(docker run --rm progrium/consul cmd:run 172.28.128.10:172.28.128.9 -d -v /mnt:/data)
+    # join existing consul cluster
+    host-2$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.102:192.168.50.101 -d -v /mnt:/data)
+
+    host-2$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+
+    # start registrator
+    host-2$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
     ```
 
-0. At this point, it's a good idea to verify the Consul cluster has 2 nodes as we expect. We can do this easily by visiting the first node's IP on port 8500 in our browser: http://172.28.128.9:8500
+    Another point worth mentioning is the Productionized special runner command listed above expects 3 nodes to exist before attempting to bootstrap the cluster. There's some way to override this via env vars, but if you're tailing the logs `$ docker logs -f consul` you'll see failures all the way until `host-3` joins the cluster.
 
 0. On `host-3`, start Consul and the DR-CoN container
 
     ```
     $ vagrant ssh host-3
 
-    host-3$ DOCKER_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }')
+    host-3$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
 
-    host-3$ echo $DOCKER_IP
+    192.168.50.103
 
-    172.28.128.5
-
-    # start consul
-    host-3$ docker run -d -h node -p 8500:8500 -p 53:53/udp progrium/consul -server -bootstrap -advertise $DOCKER_IP
+    # last node needed to bootstrap the cluster
+    host-3$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.103:192.168.50.101 -d -v /mnt:/data)
 
     # start nginx & consul template
-    host-3$ docker run -it -e "CONSUL=$DOCKER_IP:8500" -e "SERVICE=simple" -p 80:80 smoll/dr-con
+    host-3$ docker run -it -e "CONSUL=$HOST_IP:8500" -e "SERVICE=simple" -p 80:80 smoll/dr-con
     ```
+
+0. At this point, it's a good idea to verify the Consul cluster is healthy, and has 3 nodes total. There's a web UI that we can use to easily verify this: http://192.168.50.101:8500
+
+    ![Screenshot of a healthy Consul cluster](./healthy-consul-cluster.png)
 
 ### On every deploy
 
@@ -119,3 +124,17 @@
 0. Bring up a second instance of the microservice on `host-2`.
 
 0. The load balancer should now round-robin between the two containers.
+
+### Cleanup
+
+At any point, to clean up all the Docker containers on a Vagrant VM
+
+```
+docker rm -f $(docker ps -aq)
+```
+
+To completely destroy all VMs (so you can start from scratch, free up IPs, or release mem/CPU used by the VMs)
+
+```
+vagrant destroy -f
+```
