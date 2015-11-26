@@ -36,16 +36,14 @@
 
     host-1$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
 
-    172.28.128.3
+    172.28.128.9
     ```
 
 0. On `host-1`, start Consul and Registrator
 
     ```bash
-    host-1$ DOCKER_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }')
-
-    # start consul
-    host-1$ docker run -d -h node -p 8500:8500 -p 53:53/udp progrium/consul -server -bootstrap -advertise $DOCKER_IP
+    # start consul; note that we are running the cmd in a subshell!
+    host-1$ $(docker run --rm progrium/consul cmd:run 172.28.128.9 -d -v /mnt:/data)
 
     # start registrator
     host-1$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://localhost:8500
@@ -58,7 +56,19 @@
     fd3e7cd43f38        progrium/consul:latest          "/bin/start -server    27 minutes ago      Up 27 minutes       8302/tcp, 8400/tcp, 8300/tcp, 8301/udp, 53/tcp, 8301/tcp, 8302/udp, 0.0.0.0:53->53/udp, 0.0.0.0:8500->8500/tcp   berserk_hawking
     ```
 
-    do the exact same thing on `host-2`.
+0. On `host-2`, run the same commands as on `host-1` **EXCEPT** specify a join IP (or else it will start a new Consul cluster instead of joining the existing one!)
+
+    See the [README for progrium/consul](https://github.com/gliderlabs/docker-consul/tree/legacy#runner-command) for more info.
+
+    ```bash
+    host-2$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
+
+    172.28.128.10
+
+    host-2$ $(docker run --rm progrium/consul cmd:run 172.28.128.10:172.28.128.9 -d -v /mnt:/data)
+    ```
+
+0. At this point, it's a good idea to verify the Consul cluster has 2 nodes as we expect. We can do this easily by visiting the first node's IP on port 8500 in our browser: http://172.28.128.9:8500
 
 0. On `host-3`, start Consul and the DR-CoN container
 
@@ -93,7 +103,7 @@
     Note that within the private network I can now hit this service on the ephemeral port:
 
     ```
-    $ curl http://172.28.128.3:49153
+    $ curl http://172.28.128.6:49153
 
     Hello World from 9adcffb51d1c
     ```
