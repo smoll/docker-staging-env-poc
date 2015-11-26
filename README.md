@@ -11,10 +11,10 @@
 
 * We'll bring up 3 generic Docker nodes: `host-1`, `host-2` and `host-3`.
     * Host 1 and 2 represent nodes that will house application containers, while 3 will serve as our load balancer.
-* On host 1 and 2, we'll start Consul and Registrator (and also the microservice containers).
+* On host 1 and 2, we'll start Consul, Registrator, and any microservice containers.
     * Consul provides a simple K-V store of the IPs and ports of whatever we tell it.
     * Registrator provides automatic registering of newly "upped" containers to Consul, and also automatically deregisters them when they are killed.
-* On host 3, we'll start NGINX and Consul Template.
+* On host 3, we'll start Consul, NGINX and Consul Template.
     * NGINX provides a simple load balancing solution, i.e. `$ curl http://loadbalancerip/myapp` should automatically round-robin between the containers on host 1 and 2.
     * Consul Template will automatically rewrite the NGINX config and restart it whenever a container is started or stopped, as notified by Registrator (I think).
 
