@@ -1,6 +1,6 @@
 # docker-staging-env-poc
 
-[POC] Automatic Docker Container Service Discovery and (TODO: Deployment) to a Staging env
+[POC] Scalable, Automatic Docker Container Service Discovery and (TODO: Deployment) to a Staging env
 
 ## References
 * http://jlordiales.me/2015/02/03/registrator/
@@ -15,7 +15,7 @@
     * Consul provides a simple K-V store of the IPs and ports of whatever we tell it.
     * Registrator provides automatic registering of newly "upped" containers to Consul, and also automatically deregisters them when they are killed.
 * On host 3, we'll start Consul, NGINX and Consul Template.
-    * NGINX provides a simple load balancing solution, i.e. `$ curl http://loadbalancerip/myapp` should automatically round-robin between the containers on host 1 and 2.
+    * NGINX provides a simple load balancing solution, i.e. `$ curl http://loadbalancerforservice` should automatically round-robin between the app containers on host 1 and 2.
     * Consul Template will automatically rewrite the NGINX config and restart it whenever a container is started or stopped, as notified by Registrator (I think).
 
 ## Steps
@@ -93,7 +93,7 @@
 
     ![Screenshot of a healthy Consul cluster](./healthy-consul-cluster.png)
 
-### On every deploy
+### Simulate a deployment
 
 0. On `host-1`, let's bring up one instance of the microservice, naming it `simple`, on a random port (note the `-P`). In practice, this can be easily automated with Centurion or MaestroNG.
 
