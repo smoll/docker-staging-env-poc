@@ -1,16 +1,29 @@
 ## Steps
 
-Line-by-line steps and low-level demo of:
+* [Automated Provisioning](#automated-provisioning)
+* [Automated Deployment](#automated-deployment)
+* [Manual Provisioning](#manual-provisioning)
+* [Manual Deployment](#manual-deployment)
 
-One-time:
+### Automated Provisioning
+Done once:
 * Setting up the 3-node Consul cluster
 * Installing Registrator on the 2 nodes that we will launch app containers on
 * Set up 1 automatically-reconfiguring load balancer, per microservice
 
-Each deploy:
-* Bringing up a new app container. The load balancer automatically learns about it through Registrator -> Consul, and automatically rewrites its configuration via Consul Template.
+```
+vagrant up
+```
 
-### One-time setup
+### Automated Deployment
+Done each time there's a new version of the app:
+* Download the latest version of the Docker image and start (or restart) >1 app container on a random available port. The load balancer automatically learns about it through Registrator -> Consul, and automatically rewrites its configuration via Consul Template.
+
+```
+maestro pull && maestro restart
+```
+
+### Manual Provisioning
 
 0. Bring up vagrant machines (generic Docker hosts)
 
@@ -78,19 +91,19 @@ Each deploy:
     host-3$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.103:192.168.50.101 -d -v /mnt:/data)
 
     # start nginx & consul template
-    host-3$ docker run -it -e "CONSUL=$HOST_IP:8500" -e "SERVICE=simple" -p 80:80 smoll/dr-con
+    host-3$ docker run -it -e "CONSUL=$HOST_IP:8500" -e "SERVICE=flask-nanoservice" -p 80:80 smoll/dr-con
     ```
 
 0. At this point, it's a good idea to verify the Consul cluster is healthy, and has 3 nodes total. There's a web UI that we can use to easily verify this: http://192.168.50.101:8500
 
     ![Screenshot of a healthy Consul cluster](./healthy-consul-cluster.png)
 
-### Simulate a deployment
+#### Manual Deployment
 
-0. On `host-1`, let's bring up one instance of the microservice, naming it `simple`, on a random port (note the `-P`). In practice, this can be easily automated with Centurion or MaestroNG.
+0. On `host-1`, let's bring up one instance of the microservice, naming it `flask-nanoservice`, on a random port (note the `-P`). In practice, this can be easily automated with Centurion or MaestroNG.
 
     ```bash
-    host-1$ docker run -d -e "SERVICE_NAME=simple" -P smoll/flask-nanoservice
+    host-1$ docker run -d -e "SERVICE_NAME=flask-nanoservice" -P smoll/flask-nanoservice
 
     host-1$ docker port 9adcffb51d1c
 
@@ -124,7 +137,7 @@ Each deploy:
 0. Bring up a second instance of the microservice on `host-2`.
 
     ```bash
-    host-2$ docker run -d -e "SERVICE_NAME=simple" -P smoll/flask-nanoservice
+    host-2$ docker run -d -e "SERVICE_NAME=flask-nanoservice" -P smoll/flask-nanoservice
     ```
 
 0. The load balancer should now round-robin between the two containers.
