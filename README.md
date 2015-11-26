@@ -58,14 +58,14 @@
     See the [README for gliderlabs/consul](https://github.com/gliderlabs/docker-consul/tree/legacy#runner-command) for more info. **NOTE:** README says to use `JOIN_IP::CURRENT_IP` syntax, but the correct syntax appears to be `CURRENT_IP:JOIN_IP`, weird...
 
     ```bash
-    host-2$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
+    host-2$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+
+    host-2$ echo $HOST_IP
 
     192.168.50.102
 
     # join existing consul cluster
     host-2$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.102:192.168.50.101 -d -v /mnt:/data)
-
-    host-2$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
 
     # start registrator
     host-2$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
@@ -79,6 +79,8 @@
     $ vagrant ssh host-3
 
     host-3$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+
+    host-3$ echo $HOST_IP
 
     192.168.50.103
 
