@@ -82,7 +82,7 @@
 
     192.168.50.103
 
-    # last node needed to bootstrap the cluster
+    # last node needed to bootstrap consul cluster
     host-3$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.103:192.168.50.101 -d -v /mnt:/data)
 
     # start nginx & consul template
@@ -118,12 +118,38 @@
 0. The load balancer should now know about the container on `host-1`.
 
     ```
+    $ curl http://192.168.50.103
 
+    Hello World from c644a63ac0b3
+
+    $ curl http://192.168.50.103
+
+    Hello World from c644a63ac0b3
     ```
+
+    As expected, two successive curl calls return replies from the one and only app container.
 
 0. Bring up a second instance of the microservice on `host-2`.
 
+    ```
+    host-2$ docker run -d -e "SERVICE_NAME=simple" -P smoll/flask-nanoservice
+    ```
+
 0. The load balancer should now round-robin between the two containers.
+
+    ```
+    $ curl http://192.168.50.103
+
+    Hello World from c644a63ac0b3
+
+    $ curl http://192.168.50.103
+
+    Hello World from 66c594619b09
+
+    $ curl http://192.168.50.103
+
+    Hello World from c644a63ac0b3
+    ```
 
 ### Cleanup
 
