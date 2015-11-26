@@ -31,7 +31,7 @@
 
 0. SSH into each machine (`host-1`, `host-2`, `host-3`) and verify they each have a unique IP address in the private network
 
-    ```
+    ```bash
     $ vagrant ssh host-1
 
     host-1$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
@@ -75,7 +75,7 @@
 
 0. On `host-3`, start Consul and the DR-CoN container
 
-    ```
+    ```bash
     $ vagrant ssh host-3
 
     host-3$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
@@ -99,7 +99,7 @@
 
 0. On `host-1`, let's bring up one instance of the microservice, naming it `simple`, on a random port (note the `-P`). In practice, this can be easily automated with Centurion or MaestroNG.
 
-    ```
+    ```bash
     host-1$ docker run -d -e "SERVICE_NAME=simple" -P smoll/flask-nanoservice
 
     host-1$ docker port 9adcffb51d1c
@@ -109,7 +109,7 @@
 
     Note that within the private network I can now hit this service on the ephemeral port:
 
-    ```
+    ```bash
     $ curl http://172.28.128.6:49153
 
     Hello World from 9adcffb51d1c
@@ -119,7 +119,7 @@
 
 0. The load balancer should now know about the container on `host-1`.
 
-    ```
+    ```bash
     $ curl http://192.168.50.103
 
     Hello World from c644a63ac0b3
@@ -133,13 +133,13 @@
 
 0. Bring up a second instance of the microservice on `host-2`.
 
-    ```
+    ```bash
     host-2$ docker run -d -e "SERVICE_NAME=simple" -P smoll/flask-nanoservice
     ```
 
 0. The load balancer should now round-robin between the two containers.
 
-    ```
+    ```bash
     $ curl http://192.168.50.103
 
     Hello World from c644a63ac0b3
