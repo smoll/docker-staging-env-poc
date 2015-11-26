@@ -58,11 +58,25 @@
     fd3e7cd43f38        progrium/consul:latest          "/bin/start -server    27 minutes ago      Up 27 minutes       8302/tcp, 8400/tcp, 8300/tcp, 8301/udp, 53/tcp, 8301/tcp, 8302/udp, 0.0.0.0:53->53/udp, 0.0.0.0:8500->8500/tcp   berserk_hawking
     ```
 
-    do the same thing on `host-2`.
+    do the exact same thing on `host-2`.
 
-0. On `host-3`, start the load balancing container
+0. On `host-3`, start Consul and the DR-CoN container
 
-    TODO: add detail
+    ```
+    $ vagrant ssh host-3
+
+    host-3$ DOCKER_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }')
+
+    host-3$ echo $DOCKER_IP
+
+    172.28.128.5
+
+    # start consul
+    host-3$ docker run -d -h node -p 8500:8500 -p 53:53/udp progrium/consul -server -bootstrap -advertise $DOCKER_IP
+
+    # start nginx & consul template
+    host-3$ docker run -it -e "CONSUL=$DOCKER_IP:8500" -e "SERVICE=simple" -p 80:80 smoll/dr-con
+    ```
 
 ### On every deploy
 
@@ -87,6 +101,10 @@
     This isn't publicly accessible on the Internet, though.
 
 0. The load balancer should now know about the container on `host-1`.
+
+    ```
+
+    ```
 
 0. Bring up a second instance of the microservice on `host-2`.
 
