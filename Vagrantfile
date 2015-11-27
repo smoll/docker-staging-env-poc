@@ -9,13 +9,13 @@ Vagrant.configure("2") do |config|
       # step-by-step directions in README.md
       host.vm.network "private_network", ip: "192.168.50.10#{instance_number}"
 
-      # Comment these lines out if you DO NOT want to auto-provision on `vagrant up`
+      # To not run provisioners, do: vagrant up --no-provision
       provisioner = if instance_number == 1 # first
-                      "provision/leader_apphost.sh"
+                      "provision/1.sh"
                     elsif instance_number == number_of_instances # last
-                      "provision/follower_apphost.sh"
+                      "provision/3.sh"
                     else
-                      "provision/follower_loadbalancer.sh"
+                      "provision/2.sh"
                     end
       host.vm.provision "shell", path: provisioner
     end
