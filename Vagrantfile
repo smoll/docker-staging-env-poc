@@ -9,6 +9,12 @@ Vagrant.configure("2") do |config|
       # step-by-step directions in README.md
       host.vm.network "private_network", ip: "192.168.50.10#{instance_number}"
 
+      # See https://github.com/signalfx/maestro-ng/issues/63#issuecomment-118337874
+      # Still getting "SSHTunnelError: @@@ ..."
+      host.vm.provision "shell", inline: <<-SH
+        echo 'echo "Deployer connected"' >> ~/.bashrc
+      SH
+
       # To not run provisioners, do: vagrant up --no-provision
       provisioner = if instance_number == 1 # first
                       "provision/1.sh"
