@@ -1,1 +1,5 @@
 .vagrant
+
+# private registry mirror (for faster pulls/demoing)
+/registry/registry/docker-registry.db
+/registry/registry/images
