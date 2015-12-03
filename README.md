@@ -35,10 +35,11 @@
 0. Deploy the app
 
     ```
-    maestro pull && maestro restart
+    maestro status # works
+    maestro pull && maestro restart # TODO: fix this
     ```
 
-## Low-level steps
+## Granular steps
 See the steps [here](./STEPS.md).
 
 ## Takeaways
@@ -46,5 +47,11 @@ See the steps [here](./STEPS.md).
 0. Figuring out the commands to bootstrap the Consul cluster took the most trial-and-error. This is mainly because the docs are a bit of a mess, and I was confused between `progrium/consul`, `gliderlabs/consul` and the `master` vs `legacy` branches on github, as well as unclear tagging of their respective Docker images. I eventually settled on using `gliderlabs/consul:legacy` for this demo.
 
 0. Once the one-time setup is done, this is amazing. Consul web UI shows what services are registered (for sanity checking), and you can tail the output of the load balancer host to see containers as they come up, with an imperceptibly small delay.
+
+0. Enabling app containers to be launched on any random port (instead of hardcoding it and carefully avoiding port conflicts with any other containers that happen to reside on the same host) is huge. This gets us closer to treating containers like "cattle" instead of "kittens."
+
+0. Consul is responsible for checking container health (which is a lot simpler than configuring the load balancer to do the same), and because of Registrator, it essentially updates in realtime, so even if a container dies, the load balancer shouldn't drop a single request.
+
+0. I've only scratched the surface of Consul Template's [capabilities](https://hashicorp.com/blog/introducing-consul-template.html). If done right, we can make configs completely dynamic, and Consul Template can even execute an arbitrary bash command (reload nginx, or the application) when configs change.
 
 0. The final test of this POC will be to see whether this simplifies our configuration of multiple staging environments in a meaningful way.

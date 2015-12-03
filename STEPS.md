@@ -29,11 +29,11 @@ maestro pull && maestro restart # TODO: fix this
 0. Bring up vagrant machines (generic Docker hosts)
 
     ```
-    $ vagrant up
+    $ vagrant up --no-provision
     $ vagrant status
     ```
 
-0. SSH into each machine (`host-1`, `host-2`, `host-3`) and verify they each have a unique IP address in the private network
+0. SSH into each machine (`host-1`, `host-2`, `host-3`) and verify they each have a unique IP address in the private network, and Docker installed
 
     ```bash
     $ vagrant ssh host-1
@@ -41,6 +41,8 @@ maestro pull && maestro restart # TODO: fix this
     host-1$ ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'
 
     192.168.50.101
+
+    $ docker info
     ```
 
     Note that `192.168.50.101` is actually hardcoded in the Vagrantfile to make these steps deterministic! Feel free to adjust the Vagrantfile as needed.
@@ -49,12 +51,12 @@ maestro pull && maestro restart # TODO: fix this
 
     ```bash
     # start consul
-    host-1$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.101 -d -v /mnt:/data)
+    host-1$ $(docker run --restart=always gliderlabs/consul:legacy cmd:run 192.168.50.101 -d -v /mnt:/data)
 
     host-1$ export HOST_IP=$(ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 
     # start registrator
-    host-1$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
+    host-1$ docker run --restart=always -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
     ```
 
 0. On `host-2`, run the same commands as on `host-1` except for Consul, you must specify a join IP (or else it will start a new Consul cluster instead of joining the existing one!)
@@ -69,10 +71,10 @@ maestro pull && maestro restart # TODO: fix this
     192.168.50.102
 
     # join existing consul cluster
-    host-2$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.102:192.168.50.101 -d -v /mnt:/data)
+    host-2$ $(docker run --restart=always gliderlabs/consul:legacy cmd:run $HOST_IP:192.168.50.101 -d -v /mnt:/data)
 
     # start registrator
-    host-2$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
+    host-2$ docker run --restart=always -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
     ```
 
     Another point worth mentioning is the Productionized special runner command listed above expects 3 nodes to exist before attempting to bootstrap the cluster. There's some way to override this via env vars, but if you're tailing the logs `$ docker logs -f consul` you'll see failures all the way until `host-3` joins the cluster.
@@ -89,15 +91,15 @@ maestro pull && maestro restart # TODO: fix this
     192.168.50.103
 
     # last node needed to bootstrap consul cluster
-    host-3$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.103:192.168.50.101 -d -v /mnt:/data)
+    host-3$ $(docker run --restart=always gliderlabs/consul:legacy cmd:run $HOST_IP:192.168.50.101 -d -v /mnt:/data)
 
     # start nginx & consul template
-    host-3$ docker run -it -e "CONSUL=$HOST_IP:8500" -e "SERVICE=flask-nanoservice" -p 80:80 smoll/dr-con
+    host-3$ docker run --restart=always -d -e "CONSUL=$HOST_IP:8500" -e "SERVICE=flask-nanoservice" -p 80:80 smoll/dr-con:latest
     ```
 
 0. At this point, it's a good idea to verify the Consul cluster is healthy, and has 3 nodes total. There's a web UI that we can use to easily verify this: http://192.168.50.101:8500
 
-    ![Screenshot of a healthy Consul cluster](./healthy-consul-cluster.png)
+    <img src="./healthy-consul-cluster.png" width="450">
 
 #### Manual Deployment
 
