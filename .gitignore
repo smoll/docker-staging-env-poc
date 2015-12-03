@@ -1,1 +1,4 @@
 .vagrant
+
+# virtual env for maestro-ng
+/venv

@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # used by registrator
-export HOST_IP=192.168.50.102
-
-# TODO: add 'sleep until leader is up' logic, if needed?
+export HOST_IP=$(ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 
 # join existing consul cluster
 $(docker run --restart=always gliderlabs/consul:legacy cmd:run $HOST_IP:192.168.50.101 -d -v /mnt:/data)

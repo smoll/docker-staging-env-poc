@@ -20,7 +20,8 @@ Done each time there's a new version of the app:
 * Download the latest version of the Docker image and start (or restart) >1 app container on a random available port. The load balancer automatically learns about it through Registrator -> Consul, and automatically rewrites its configuration via Consul Template.
 
 ```
-maestro pull && maestro restart
+maestro status
+maestro pull && maestro restart # TODO: fix this
 ```
 
 ### Manual Provisioning
@@ -37,7 +38,7 @@ maestro pull && maestro restart
     ```bash
     $ vagrant ssh host-1
 
-    host-1$ ifconfig enp0s8 | grep 'inet ' | awk '{ print $2 }'
+    host-1$ ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'
 
     192.168.50.101
     ```
@@ -50,7 +51,7 @@ maestro pull && maestro restart
     # start consul
     host-1$ $(docker run --rm gliderlabs/consul:legacy cmd:run 192.168.50.101 -d -v /mnt:/data)
 
-    host-1$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+    host-1$ export HOST_IP=$(ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 
     # start registrator
     host-1$ docker run -d --name=registrator --net=host --volume=/var/run/docker.sock:/tmp/docker.sock gliderlabs/registrator:latest consul://$HOST_IP:8500
@@ -61,7 +62,7 @@ maestro pull && maestro restart
     See the [README for gliderlabs/consul](https://github.com/gliderlabs/docker-consul/tree/legacy#runner-command) for more info. **NOTE:** README says to use `JOIN_IP::CURRENT_IP` syntax, but the correct syntax appears to be `CURRENT_IP:JOIN_IP`, weird...
 
     ```bash
-    host-2$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+    host-2$ export HOST_IP=$(ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 
     host-2$ echo $HOST_IP
 
@@ -81,7 +82,7 @@ maestro pull && maestro restart
     ```bash
     $ vagrant ssh host-3
 
-    host-3$ export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+    host-3$ export HOST_IP=$(ifconfig eth1 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 
     host-3$ echo $HOST_IP
 
