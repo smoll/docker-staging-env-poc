@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # used by registrator
-export HOST_IP=$(ifconfig enp0s8 | grep 'inet ' | awk '{ print $2  }')
+export HOST_IP=192.168.50.101
 
 # lead consul cluster
 $(docker run --restart=always gliderlabs/consul:legacy cmd:run 192.168.50.101 -d -v /mnt:/data)

@@ -3,25 +3,25 @@
 __maestro:
   schema: 2
 
-name: flask-nanoservice
+name: demo
 ships:
   vm1:
     ip: 192.168.50.101
     ssh_tunnel:
-      user: core
+      user: vagrant
       key: {{ env.HOME }}/.vagrant.d/insecure_private_key
   vm2:
     ip: 192.168.50.102
     ssh_tunnel:
-      user: core
+      user: vagrant
       key: {{ env.HOME }}/.vagrant.d/insecure_private_key
 services:
-  hello:
+  flask-nanoservice:
     image: smoll/flask-nanoservice
     instances:
-      f1:
+      flask-nanoservice-1:
         ship: vm1
-        ports: {http: "5000:5001"}
-      f2:
+        ports: {hello: "5000:5001"}
+      flask-nanoservice-2:
         ship: vm2
-        ports: {http: "5000:5002"}
+        ports: {hello: "5000:5002"}

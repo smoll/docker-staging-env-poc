@@ -16,6 +16,28 @@
     * NGINX provides a simple load balancing solution, i.e. `$ curl http://loadbalancerforservice` should automatically round-robin between the app containers on host 1 and 2.
     * Consul Template will automatically rewrite the NGINX config and restart it whenever a container is started or stopped, as Registrator updates Consul's K-V store.
 
+## Usage
+
+0. Bring up the Docker hosts & Consul cluster
+
+    ```
+    vagrant up
+    ```
+
+    Then view the Consul web UI at http://192.168.50.101:8500
+
+0. In another terminal window, start issuing a stream of requests against the load balancer
+
+    ```
+    while sleep 1; do curl http://192.168.50.103; done
+    ```
+
+0. Deploy the app
+
+    ```
+    maestro pull && maestro restart
+    ```
+
 ## Low-level steps
 See the steps [here](./STEPS.md).
 
