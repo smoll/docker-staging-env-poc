@@ -4,6 +4,8 @@ __maestro:
   schema: 2
 
 name: demo
+ship_defaults:
+  api_version: auto
 ships:
   vm1:
     ip: 192.168.50.101

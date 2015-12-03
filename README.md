@@ -16,6 +16,12 @@
     * NGINX provides a simple load balancing solution, i.e. `$ curl http://loadbalancerforservice` should automatically round-robin between the app containers on host 1 and 2.
     * Consul Template will automatically rewrite the NGINX config and restart it whenever a container is started or stopped, as Registrator updates Consul's K-V store.
 
+## Docker images used
+* [gliderlabs/consul](https://github.com/gliderlabs/docker-consul)
+* [gliderlabs/registrator](https://github.com/gliderlabs/registrator)
+* [smoll/dr-con](https://github.com/smoll/DR-CoN) (nginx + Consul Template)
+* [smoll/flask-nanoservice](https://github.com/smoll/flask-nanoservice) (simple, generic Python microservice)
+
 ## Usage
 
 0. Bring up the Docker hosts & Consul cluster
@@ -55,3 +61,7 @@ See the steps [here](./STEPS.md).
 0. I've only scratched the surface of Consul Template's [capabilities](https://hashicorp.com/blog/introducing-consul-template.html). If done right, we can make configs completely dynamic, and Consul Template can even execute an arbitrary bash command (reload nginx, or the application) when configs change.
 
 0. The final test of this POC will be to see whether this simplifies our configuration of multiple staging environments in a meaningful way.
+
+## Issues
+
+0. I couldn't get MaestroNG to work. `maestro status` seems to work but whenever I try anything meatier, like `maestro start`, either [it hangs](https://github.com/signalfx/maestro-ng/issues/63) (while using the CoreOS Vagrant boxes) or I get a [bad response from the HTTP request made to the Docker daemon over the SSH tunnel](https://github.com/signalfx/maestro-ng/issues/149). I don't think this problem would occur in a non-VM-based deployment, but this is problematic. Might need to use a tool like Capistrano/Fabric for automated deployments instead, for now.
