@@ -1,0 +1,9 @@
+# Ansible playbook for app container
+
+- name: flask-nanoservice
+  docker:
+    name: flask-nanoservice
+    image: smoll/flask-nanoservice:latest
+    pull: always
+    state: reloaded
+    restart_policy: always
