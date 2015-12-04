@@ -29,6 +29,11 @@
     sudo pip install ansible # ansible -h
     ```
 
+0. Ansible roles from VCS
+    ```
+    ansible-galaxy install -r ansible/requirements.yml
+    ```
+
 0. [Vagrant](http://www.vagrantup.com/downloads)
 
 ## Usage

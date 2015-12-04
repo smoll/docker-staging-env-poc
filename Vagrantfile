@@ -16,15 +16,14 @@ Vagrant.configure("2") do |config|
       # step-by-step directions in README.md
       host.vm.network "private_network", ip: "192.168.50.#{100 + i}"
 
-      # Only run this provisioner on the first 'vagrant up'
-      if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
-        # Install Docker
-        pkg_cmd = "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
-          "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-          "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker; "
-        # Add vagrant user to the docker group
-        pkg_cmd << "usermod -a -G docker vagrant; "
-        host.vm.provision :shell, :inline => pkg_cmd
+      # See http://docs.ansible.com/ansible/guide_vagrant.html#running-ansible-manually
+      config.vm.network :forwarded_port, guest: 22, host: 2200 + i, id: 'ssh'
+
+      # Install Docker
+      config.vm.provision "ansible" do |ansible|
+        ansible.verbose = "v"
+        ansible.playbook = "ansible/docker.yml"
+        ansible.sudo = true
       end
 
       # To not run provisioners, do: vagrant up --no-provision
