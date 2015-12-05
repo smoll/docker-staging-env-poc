@@ -1,5 +1,5 @@
 # docker-staging-env-poc
-[POC] Scalable, Automatic Docker Container Service Discovery and (TODO: Deployment) to a Staging env
+[POC] Scalable, Automatic Docker Container Service Discovery and Deployment to a Staging env
 
 ## References
 * http://jlordiales.me/2015/02/03/registrator/
