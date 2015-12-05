@@ -1,9 +1,23 @@
-# Ansible playbook for app container
+# Ansible playbook for deploying the app container
 
-- name: Flask nanoservice
-  docker:
-    name: flask-nanoservice
-    image: smoll/flask-nanoservice:latest
-    pull: always
-    state: reloaded
-    restart_policy: always
+- name: Deploy
+  hosts: all
+  roles:
+    - bobbyrenwick.pip
+  tasks:
+    - name: make sure required PyPi packages are installed
+      pip: name={{ item }} state=present
+      sudo: yes
+      with_items:
+        - docker-py==1.2.3
+        - six>=1.4.0
+    - name: Flask nanoservice
+      # TODO: get rid of sudo
+      sudo: yes
+      docker:
+        name: flask-nanoservice
+        image: smoll/flask-nanoservice:latest
+        publish_all_ports: yes
+        pull: always
+        state: reloaded
+        restart_policy: always
