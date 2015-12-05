@@ -22,6 +22,20 @@
 * [smoll/dr-con](https://github.com/smoll/DR-CoN) (nginx + Consul Template)
 * [smoll/flask-nanoservice](https://github.com/smoll/flask-nanoservice) (simple, generic Python microservice)
 
+## Prerequisites
+
+0. Ansible
+    ```bash
+    sudo pip install ansible # ansible -h
+    ```
+
+0. Ansible roles from VCS
+    ```
+    ansible-galaxy install -r ansible/requirements.yml
+    ```
+
+0. [Vagrant](http://www.vagrantup.com/downloads)
+
 ## Usage
 
 0. Bring up the Docker hosts & Consul cluster
@@ -41,8 +55,7 @@
 0. Deploy the app
 
     ```
-    maestro status # works
-    maestro pull && maestro restart # TODO: fix this
+    sh deploy.sh
     ```
 
 ## Granular steps

@@ -1,0 +1,5 @@
+# Docker playbook
+
+- hosts: all
+  roles:
+    - ansible-docker

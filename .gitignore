@@ -1,4 +1,7 @@
 .vagrant
 
-# virtual env for maestro-ng
+# virtual env for python deploy tools
 /venv
+
+# these are pulled from other VCS
+/ansible/roles

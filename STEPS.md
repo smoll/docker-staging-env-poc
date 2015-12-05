@@ -20,8 +20,7 @@ Done each time there's a new version of the app:
 * Download the latest version of the Docker image and start (or restart) >1 app container on a random available port. The load balancer automatically learns about it through Registrator -> Consul, and automatically rewrites its configuration via Consul Template.
 
 ```
-maestro status
-maestro pull && maestro restart # TODO: fix this
+sh deploy.sh
 ```
 
 ### Manual Provisioning
