@@ -1,1 +1,6 @@
+[apphosts]
 host-1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2201
+host-2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2202
+
+[loadbalancer]
+host-3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2203
