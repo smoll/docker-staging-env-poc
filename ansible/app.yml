@@ -2,16 +2,7 @@
 
 - name: Deploy
   hosts: apphosts
-  roles:
-    - bobbyrenwick.pip
   tasks:
-    # Workaround for https://github.com/ansible/ansible-modules-core/issues/1792#issuecomment-148264962
-    - name: make sure required PyPi packages are installed
-      pip: name={{ item }} state=present
-      sudo: yes
-      with_items:
-        - docker-py==1.2.3
-        - six>=1.4.0
     - name: Flask nanoservice
       # TODO: get rid of sudo
       sudo: yes
@@ -21,4 +12,3 @@
         publish_all_ports: yes
         pull: always
         state: reloaded
-        restart_policy: always

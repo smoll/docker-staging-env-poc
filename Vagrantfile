@@ -19,14 +19,16 @@ Vagrant.configure("2") do |config|
       # See http://docs.ansible.com/ansible/guide_vagrant.html#running-ansible-manually
       config.vm.network :forwarded_port, guest: 22, host: 2200 + i, id: 'ssh'
 
-      # Install Docker
+      # To not run provisioners, do: vagrant up --no-provision
+
+      # Install Docker & prereqs to deploying containers via Ansible
       config.vm.provision "ansible" do |ansible|
         ansible.verbose = "v"
-        ansible.playbook = "ansible/docker.yml"
+        ansible.playbook = "ansible/common.yml"
         ansible.sudo = true
       end
 
-      # To not run provisioners, do: vagrant up --no-provision
+      # Bootstrap consul cluster
       provisioner = if i == 1 # first
                       "provision/1.sh"
                     elsif i == $number_of_machines # last

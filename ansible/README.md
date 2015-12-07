@@ -17,7 +17,7 @@
     ####Install Docker
 
     ```
-    ansible-playbook --private-key=~/.vagrant.d/insecure_private_key -u vagrant -i hosts -s docker.yml
+    ansible-playbook --private-key=~/.vagrant.d/insecure_private_key -u vagrant -i hosts -s common.yml
     ```
 
     (note the `-s` for sudo)
