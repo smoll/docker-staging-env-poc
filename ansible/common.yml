@@ -1,9 +1,5 @@
 - name: Install components common to all hosts
   hosts: all
   roles:
-    # Install Docker
-    - ansible-docker
-    # Dependency for Ansible `docker` module/primitive
-    - bobbyrenwick.pip
-    # Bootstrap Consul cluster
+    # Bootstrap Docker-based Consul cluster
     - smoll.docker-consul
