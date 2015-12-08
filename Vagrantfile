@@ -17,15 +17,16 @@ Vagrant.configure("2") do |config|
       host.vm.network "private_network", ip: "192.168.50.#{100 + i}"
 
       # See http://docs.ansible.com/ansible/guide_vagrant.html#running-ansible-manually
-      config.vm.network :forwarded_port, guest: 22, host: 2200 + i, id: 'ssh'
+      host.vm.network :forwarded_port, guest: 22, host: 2200 + i, id: 'ssh'
 
       # To not run provisioners, do: vagrant up --no-provision
 
       # Install Docker & prereqs to deploying containers via Ansible
-      config.vm.provision "ansible" do |ansible|
-        ansible.verbose = "v"
+      host.vm.provision "ansible" do |ansible|
+        ansible.inventory_path = "ansible/hosts"
         ansible.playbook = "ansible/common.yml"
         ansible.sudo = true
+        ansible.verbose = "v"
       end
 
       # Bootstrap consul cluster

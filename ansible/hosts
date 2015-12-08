@@ -1,6 +1,6 @@
 [apphosts]
-host-1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2201
-host-2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2202
+host-1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2201 consul_cluster_size=3
+host-2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2202 consul_leader_ip=192.168.50.101
 
 [loadbalancer]
-host-3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2203
+host-3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=2203 consul_leader_ip=192.168.50.101

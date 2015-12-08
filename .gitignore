@@ -5,3 +5,4 @@
 
 # these are pulled from other VCS
 /ansible/roles
+/roles

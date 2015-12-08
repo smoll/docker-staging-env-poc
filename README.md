@@ -31,7 +31,7 @@
 
 0. Ansible roles from VCS
     ```
-    sudo ansible-galaxy install -r ansible/requirements.yml # --force
+    cd ansible; sudo ansible-galaxy install -r requirements.yml # --force
     ```
 
 0. [Vagrant](http://www.vagrantup.com/downloads)

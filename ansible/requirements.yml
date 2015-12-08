@@ -1,3 +1,1 @@
-- src: bobbyrenwick.pip
-- src: git+ssh://git@github.com/smoll/ansible-docker.git
-  path: roles
+- src: smoll.docker-consul
